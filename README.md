@@ -27,6 +27,14 @@ provider helm {
 
 ```hcl
 
+locals {
+  argocd_ingress_annotations = {
+    "cert-manager.io/cluster-issuer"           = module.cert_manager.issuer
+    "appgw.ingress.kubernetes.io/ssl-redirect" = "true"
+    "kubernetes.io/ingress.class"              = "azure/application-gateway"
+  }
+}
+
 module "argocd" {
   source              = "https://gitlab.com/deimosdev/tooling/terraform-modules/terraform-argocd"
   git_url             = var.argocd_gitops_repo
