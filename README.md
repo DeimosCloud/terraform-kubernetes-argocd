@@ -3,8 +3,57 @@ Setup ArgoCD on cluster using terraform. Ensure the `kubernetes` provider config
 
 ## Usage
 
+
+### Argocd with Nginx Ingress Controller
 ```hcl
-# Kubernetes Provider settings for AKS
+
+locals {
+  # Example annotations when using Nginx ingress controller as shown here https://argoproj.github.io/argo-cd/operator-manual/ingress/#option-1-ssl-passthrough
+  argocd_ingress_annotations = {
+    "kubernetes.io/ingress.class" = nginx
+    "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
+    "nginx.ingress.kubernetes.io/ssl-passthrough" = "true"
+  }
+}
+
+module "argocd" {
+  source              = "https://gitlab.com/deimosdev/tooling/terraform-modules/terraform-argocd"
+  git_url             = var.argocd_gitops_repo
+  git_access_token    = var.argocd_access_token
+  ingress_host        = "argocd.${var.dns_zone_name}"
+  ingress_annotations = local.argocd_ingress_annotations
+
+  module_depends_on = [module.external_dns, module.ingress_controller, module.cert_manager]
+}
+```
+
+### Argocd with Azure Application Gateway Ingress Controller
+```hcl
+locals {
+  # Example annotations when using Azure application gateway Ingress Controller with Cert-manager
+  argocd_ingress_annotations = {
+    "cert-manager.io/cluster-issuer"           = module.cert_manager.issuer
+    "appgw.ingress.kubernetes.io/ssl-redirect" = "true"
+    "kubernetes.io/ingress.class"              = "azure/application-gateway"
+  }
+}
+
+module "argocd" {
+  source              = "https://gitlab.com/deimosdev/tooling/terraform-modules/terraform-argocd"
+  git_url             = var.argocd_gitops_repo
+  git_access_token    = var.argocd_access_token
+  ingress_host        = "argocd.${var.dns_zone_name}"
+  ingress_annotations = local.argocd_ingress_annotations
+  server_insecure     = true # Run argocd-server in secure mode to prevent SSL conflicts with application/gateway and cert-manager
+
+  module_depends_on = [module.external_dns, module.ingress_controller, module.cert_manager]
+}
+```
+#### Ensure Kubernetes Provider and Helm Provider settings are correct
+
+##### Example showing a sample of valid AKS provider config
+```hcl
+# Example Kubernetes Provider settings for AKS
 provider kubernetes {
   host                   = module.aks.host
   client_certificate     = base64decode(module.aks.client_certificate)
@@ -24,28 +73,25 @@ provider helm {
   }
 }
 ```
-
+##### Example showing a sample of valid GKE Provider config
 ```hcl
+# Example Kubernetes Provider settings GKE
+provider "kubernetes" {
+  load_config_file       = false
+  host                   = module.gke.endpoint
+  token                  = data.google_client_config.provider.access_token
+  cluster_ca_certificate = base64decode(module.gke.ca_certificate)
+}
 
-locals {
-  argocd_ingress_annotations = {
-    "cert-manager.io/cluster-issuer"           = module.cert_manager.issuer
-    "appgw.ingress.kubernetes.io/ssl-redirect" = "true"
-    "kubernetes.io/ingress.class"              = "azure/application-gateway"
+provider "helm" {
+  kubernetes {
+    load_config_file       = false
+    host                   = module.gke.endpoint
+    token                  = data.google_client_config.provider.access_token
+    cluster_ca_certificate = base64decode(module.gke.ca_certificate)
   }
 }
-
-module "argocd" {
-  source              = "https://gitlab.com/deimosdev/tooling/terraform-modules/terraform-argocd"
-  git_url             = var.argocd_gitops_repo
-  git_access_token    = var.argocd_access_token
-  ingress_host        = "argocd.${var.dns_zone_name}"
-  ingress_annotations = local.argocd_ingress_annotations
-
-  module_depends_on = [module.external_dns, module.ingress_controller, module.cert_manager]
-}
 ```
-
 
 ## Requirements
 
