@@ -1,3 +1,12 @@
+terraform {
+  required_version = ">= 0.12"
+
+  required_providers {
+    helm       = ">=1.2.3"
+    kubernetes = ">=1.11.3"
+  }
+}
+
 locals {
   # Use this to know if any auth method has been specified
   # True if no config has been specified and in such a case server.config.repositories will be null
