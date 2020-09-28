@@ -16,7 +16,12 @@ locals {
   }
   argocd_repositories = [
     {
-      url          = "https://gitlab.com/deimosdev/internal-projects/dcp/gitops.git"
+      url          = "https://repo.git"
+      username = "hello"
+      password = "bar"
+    },
+    {
+      url          = "https://repo.git"
       access_token = var.argocd_access_token
     },
     {
@@ -120,17 +125,13 @@ provider "helm" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| chart\_version | version of charts | `string` | `"2.5.4"` | no |
-| git\_access\_token | An Optional Access Token for git authentication | `any` | `null` | no |
-| git\_password | The password for the user | `any` | `null` | no |
-| git\_ssh\_key | sshkey for authentication | `any` | `null` | no |
-| git\_url | the url of the git repo to authenticate to | `any` | n/a | yes |
-| git\_username | Username for authentication | `any` | `null` | no |
+| chart\_version | version of charts | `string` | `"2.7.4"` | no |
 | ingress\_annotations | annotations to pass to the ingress | `map` | `{}` | no |
 | ingress\_host | The ingress host | `any` | `null` | no |
 | ingress\_tls\_secret | The TLS secret name for argocd ingress | `string` | `"argocd-server-tls"` | no |
 | module\_depends\_on | resources that the module depends on, aks, namespace creation etc | `any` | `null` | no |
 | namespace | The namespace to deploy argocd into | `string` | `"argocd"` | no |
+| repositories | A list of repository defintions | `list(map(string))` | `[]` | no |
 | server\_extra\_args | Extra arguments passed to argoCD server | `list` | `[]` | no |
 | server\_insecure | Whether to run the argocd-server with --insecure flag. Useful when disabling argocd-server tls default protocols to provide your certificates | `bool` | `false` | no |
 
@@ -140,3 +141,4 @@ provider "helm" {
 |------|-------------|
 | namespace | the kubernetes namespace of the release |
 | release\_name | the name of the release |
+| server\_url | The server URL of argocd created by ingress |

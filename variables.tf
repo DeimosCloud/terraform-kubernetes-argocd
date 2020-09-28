@@ -12,9 +12,8 @@ variable "repositories" {
   #      ssh_key= "RSA-bar"
   #    },
   #    {
-  #      url:"https:repo"
-  #      username: "foo"
-  #      access_key :"bar"
+  #      url= "https:repo"
+  #      access_token = "bar"
   #    },
   #    {
   #      url  = "https://charts.jetstack.io"
