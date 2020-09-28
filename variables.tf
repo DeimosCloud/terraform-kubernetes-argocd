@@ -3,32 +3,31 @@ variable "namespace" {
   description = "The namespace to deploy argocd into"
 }
 
-variable "git_ssh_key" {
-  description = "sshkey for authentication"
-  default     = null
-}
-
-variable "git_access_token" {
-  description = "An Optional Access Token for git authentication"
-  default     = null
-}
-variable "git_username" {
-  description = "Username for authentication"
-  default     = null
-}
-
-variable "git_password" {
-  description = "The password for the user"
-  default     = null
-}
-
-variable "git_url" {
-  description = "the url of the git repo to authenticate to"
+variable "repositories" {
+  description = "A list of repository defintions"
+  #  default = [
+  #    {
+  #      url= "https:repo"
+  #      username= "foo"
+  #      ssh_key= "RSA-bar"
+  #    },
+  #    {
+  #      url:"https:repo"
+  #      username: "foo"
+  #      access_key :"bar"
+  #    },
+  #    {
+  #      url  = "https://charts.jetstack.io"
+  #      type = "helm"
+  #    },
+  #  ]
+  default = []
+  type    = list(map(string))
 }
 
 variable "chart_version" {
   description = "version of charts"
-  default     = "2.5.4"
+  default     = "2.7.4"
 }
 
 variable "module_depends_on" {
@@ -60,4 +59,12 @@ variable "ingress_host" {
 variable "ingress_annotations" {
   description = "annotations to pass to the ingress"
   default     = {}
+  #  default = {
+  #    "kubernetes.io/ingress.class"                    = "nginx"
+  #    "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
+  #    "nginx.ingress.kubernetes.io/ssl-passthrough"    = "true"
+  #    "nginx.ingress.kubernetes.io/backend-protocol"   = "HTTPS"
+  #    "kubernetes.io/tls-acme"                         = "true"
+  #    "cert-manager.io/cluster-issuer"                 = "lets-encrypt"
+  #  }
 }

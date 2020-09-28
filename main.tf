@@ -8,64 +8,72 @@ terraform {
 }
 
 locals {
-  # Use this to know if any auth method has been specified
-  # True if no config has been specified and in such a case server.config.repositories will be null
-  no_auth_config = var.git_ssh_key == null && var.git_username == null && var.git_access_token == null
 
-  secret_name         = "argocd-repository-credentials"
-  ssh_secret_key      = "ssh"
-  username_secret_key = "username"
-  password_secret_key = "password"
+  secret_name = "argocd-repository-credentials"
 
+  # Get list of all keys for secrets
+  secret_keys = [
+    for i, repo in var.repositories :
+    ["username-${i}", "password-${i}", "sshkey-${i}", ]
+  ]
 
-  # For SSH Key authentications
-  config_map = {
-    url = var.git_url
+  # Get values for each key
+  secret_values = [
+    for repo in var.repositories :
+    [
+      lookup(repo, "username", lookup(repo, "access_token", null) != null ? "argocd" : null),
+      lookup(repo, "password", lookup(repo, "access_token", null)),
+      lookup(repo, "password", lookup(repo, "ssh_key", null))
+    ]
+  ]
+
+  # Delete keys with empty values
+  secrets = {
+    for key, value in zipmap(flatten(local.secret_keys), flatten(local.secret_values)) :
+    key => value if value != null
   }
 
-  ssh_config_map = {
-    sshPrivateKeySecret = {
-      name = local.secret_name
-      key  = local.ssh_secret_key
+  # construct a map of repositories in format
+  # {
+  # type         = repoType
+  # url            = repoURL
+  # usernameSecret = usernameSecret
+  # passwordSecret = passwordSecret
+  # sshSecret      = sshSecret
+  # }
+  all_repositories = [
+    for i, repo in var.repositories : {
+      type = lookup(repo, "type", null)
+      url  = repo.url
+      usernameSecret = lookup(repo, "username", lookup(repo, "access_token", null) != null ? "argocd" : null) == null ? null : {
+        key  = "username-${i}"
+        name = local.secret_name
+      }
+      passwordSecret = lookup(repo, "password", lookup(repo, "access_token", null)) == null ? null : {
+        key  = "password-${i}"
+        name = local.secret_name
+      }
+      sshSecret = lookup(repo, "password", lookup(repo, "ssh_key", null)) == null ? null : {
+        key  = "sshkey-${i}"
+        name = local.secret_name
+      }
     }
-  }
+  ]
 
-  username_config_map = {
-    usernameSecret = {
-      name = local.secret_name
-      key  = local.username_secret_key
+  # Remove map keys from all_repositories with no value. That means they were not specified
+  clean_repositories = [
+    for repo in local.all_repositories : {
+      for k, v in repo : k => v if v != null
     }
-    passwordSecret = {
-      name = local.secret_name
-      key  = local.password_secret_key
-    }
-  }
-
-
-  # Secret for ssh
-  ssh_secret = {
-    "${local.ssh_secret_key}" = var.git_ssh_key
-  }
-
-  # Secret for Username/password
-  # If access token is provided, the username can be any string with the access token as password
-  # https://argoproj.github.io/argo-cd/user-guide/private-repositories/#access-token
-  username_secret = {
-    "${local.username_secret_key}" = var.git_access_token == null ? var.git_username : "argocd"
-    "${local.password_secret_key}" = var.git_access_token == null ? var.git_password : var.git_access_token
-  }
-
-  # Authentication can be using username or SSH Keys. If sshkey is not specified it should default to username/password
-  # This will not still be used unless local.no_auth_config is false
-  auth_config_map = var.git_ssh_key == null ? local.username_config_map : local.ssh_config_map
-  auth_secret     = var.git_ssh_key == null ? local.username_secret : local.ssh_secret
+  ]
 
   # If no_auth_config has been specified, set all configs as null
+  # https://github.com/argoproj/argo-helm/blob/master/charts/argo-cd/values.yaml
   values = {
     server = {
       config = {
         # Configmaps require strings, yamlencode the map
-        repositories = yamlencode(local.no_auth_config ? null : [merge(local.config_map, local.auth_config_map)])
+        repositories = yamlencode(local.clean_repositories)
       }
       # Run insecure mode if specified, to prevent argocd from using it's own certificate
       extraArgs = var.server_insecure ? ["--insecure"] : null
@@ -82,7 +90,7 @@ locals {
       }
     }
     configs = {
-      repositoryCredentials = local.no_auth_config ? null : local.auth_secret
+      repositoryCredentials = local.secrets
     }
   }
 }

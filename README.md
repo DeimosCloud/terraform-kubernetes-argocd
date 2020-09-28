@@ -14,16 +14,26 @@ locals {
     "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     "nginx.ingress.kubernetes.io/ssl-passthrough" = "true"
   }
+  argocd_repositories = [
+    {
+      url          = "https://gitlab.com/deimosdev/internal-projects/dcp/gitops.git"
+      access_token = var.argocd_access_token
+    },
+    {
+      url  = "https://charts.jetstack.io"
+      type = "helm"
+    },
+  ]
+
 }
 
 module "argocd" {
   source              = "https://gitlab.com/deimosdev/tooling/terraform-modules/terraform-argocd"
-  git_url             = var.argocd_gitops_repo
-  git_access_token    = var.argocd_access_token
-  ingress_host        = "argocd.${var.dns_zone_name}"
+  ingress_host        = "argocd.example.com"
+  repositories        = local.argocd_repositories
   ingress_annotations = local.argocd_ingress_annotations
 
-  module_depends_on = [module.external_dns, module.ingress_controller, module.cert_manager]
+  module_depends_on = [module.gke]
 }
 ```
 
@@ -40,13 +50,12 @@ locals {
 
 module "argocd" {
   source              = "https://gitlab.com/deimosdev/tooling/terraform-modules/terraform-argocd"
-  git_url             = var.argocd_gitops_repo
-  git_access_token    = var.argocd_access_token
+  repositories        = local.argocd_repositories
   ingress_host        = "argocd.${var.dns_zone_name}"
   ingress_annotations = local.argocd_ingress_annotations
   server_insecure     = true # Run argocd-server in secure mode to prevent SSL conflicts with application/gateway and cert-manager
 
-  module_depends_on = [module.external_dns, module.ingress_controller, module.cert_manager]
+  module_depends_on = [module.gke]
 }
 ```
 #### Ensure Kubernetes Provider and Helm Provider settings are correct
