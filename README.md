@@ -63,49 +63,8 @@ module "argocd" {
   module_depends_on = [module.gke]
 }
 ```
-#### Ensure Kubernetes Provider and Helm Provider settings are correct
 
-##### Example showing a sample of valid AKS provider config
-```hcl
-# Example Kubernetes Provider settings for AKS
-provider kubernetes {
-  host                   = module.aks.host
-  client_certificate     = base64decode(module.aks.client_certificate)
-  client_key             = base64decode(module.aks.client_key)
-  cluster_ca_certificate = base64decode(module.aks.cluster_ca_certificate)
-  load_config_file       = false
-}
-
-# Kubernetes Provider settings for AKS
-provider helm {
-  kubernetes {
-    host                   = module.aks.host
-    client_certificate     = base64decode(module.aks.client_certificate)
-    client_key             = base64decode(module.aks.client_key)
-    cluster_ca_certificate = base64decode(module.aks.cluster_ca_certificate)
-    load_config_file       = false
-  }
-}
-```
-##### Example showing a sample of valid GKE Provider config
-```hcl
-# Example Kubernetes Provider settings GKE
-provider "kubernetes" {
-  load_config_file       = false
-  host                   = module.gke.endpoint
-  token                  = data.google_client_config.provider.access_token
-  cluster_ca_certificate = base64decode(module.gke.ca_certificate)
-}
-
-provider "helm" {
-  kubernetes {
-    load_config_file       = false
-    host                   = module.gke.endpoint
-    token                  = data.google_client_config.provider.access_token
-    cluster_ca_certificate = base64decode(module.gke.ca_certificate)
-  }
-}
-```
+Ensure Kubernetes Provider and Helm Provider settings are correct https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/guides/getting-started#provider-setup
 
 ## Doc generation
 
