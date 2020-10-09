@@ -83,10 +83,10 @@ locals {
         https       = true
         annotations = var.ingress_annotations
         hosts       = [var.ingress_host]
-        tls = [{
+        tls = var.server_insecure ? [{
           secretName = var.ingress_tls_secret
           hosts      = [var.ingress_host]
-        }]
+        }] : null
       }
     }
     configs = {
