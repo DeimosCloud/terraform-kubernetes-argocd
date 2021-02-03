@@ -33,7 +33,7 @@ locals {
 }
 
 module "argocd" {
-  source              = "https://gitlab.com/deimosdev/tooling/terraform-modules/terraform-argocd"
+  source              = "https://gitlab.com/deimosdev/tooling/terraform-modules/terraform-kubernetes-argocd"
   ingress_host        = "argocd.example.com"
   repositories        = local.argocd_repositories
   ingress_annotations = local.argocd_ingress_annotations
@@ -54,7 +54,7 @@ locals {
 }
 
 module "argocd" {
-  source              = "https://gitlab.com/deimosdev/tooling/terraform-modules/terraform-argocd"
+  source              = "https://gitlab.com/deimosdev/tooling/terraform-modules/terraform-kubernetes-argocd"
   repositories        = local.argocd_repositories
   ingress_host        = "argocd.${var.dns_zone_name}"
   ingress_annotations = local.argocd_ingress_annotations
@@ -72,11 +72,11 @@ Code formatting and documentation for variables and outputs is generated using [
 
 Follow [these instructions](https://github.com/antonbabenko/pre-commit-terraform#how-to-install) to install pre-commit locally.
 
-And install `terraform-docs` with 
+And install `terraform-docs` with
 ```bash
 go get github.com/segmentio/terraform-docs
 ```
-or 
+or
 ```bash
 brew install terraform-docs.
 ```
@@ -85,7 +85,7 @@ brew install terraform-docs.
 
 Report issues/questions/feature requests on in the issues section.
 
-Full contributing guidelines are covered [here](CONTRIBUTIONS.md).
+Full contributing guidelines are covered [here](CONTRIBUTING.md).
 
 ## Requirements
 
