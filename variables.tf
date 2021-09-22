@@ -26,7 +26,7 @@ variable "repositories" {
 
 variable "chart_version" {
   description = "version of charts"
-  default     = "2.17.4"
+  default     = null
 }
 
 variable "module_depends_on" {
