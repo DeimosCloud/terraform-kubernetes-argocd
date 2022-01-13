@@ -41,7 +41,7 @@ variable "ingress_annotations" {
 
 variable "manifests" {
   description = "Path/URL to manifests to be applied after argocd is deployed"
-  default     = null
+  default     = []
   type        = list(string)
 }
 
