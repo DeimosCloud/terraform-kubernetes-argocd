@@ -116,6 +116,7 @@ resource "helm_release" "argocd" {
 }
 
 resource "null_resource" "extra_manifests" {
+  count = length(local.extra_manifests) > 0 ? 1 : 0
   triggers = {
     extra_manifests = local.extra_manifests
   }
