@@ -36,6 +36,18 @@ module "argocd" {
   source              = "https://gitlab.com/deimosdev/tooling/terraform-modules/terraform-kubernetes-argocd"
   ingress_host        = "argocd.example.com"
   repositories        = local.argocd_repositories
+  config = {
+    "accounts.image-updater" = "apiKey"
+  }
+
+  rbac_config = {
+    "policy.default" = "role:readonly"
+    "policy.csv"     = <<POLICY
+  p, role:image-updater, applications, get, */*, allow
+  p, role:image-updater, applications, update, */*, allow
+  g, image-updater, role:image-updater
+POLICY
+  }
   ingress_annotations = local.argocd_ingress_annotations
 
   module_depends_on = [module.gke]
@@ -87,38 +99,56 @@ Report issues/questions/feature requests on in the issues section.
 
 Full contributing guidelines are covered [here](CONTRIBUTING.md).
 
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.12 |
-| helm | >=1.2.3 |
-| kubernetes | >=1.11.3 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.12 |
+| <a name="requirement_helm"></a> [helm](#requirement\_helm) | >=1.2.3 |
+| <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >=1.11.3 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| helm | >=1.2.3 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | >=1.2.3 |
+| <a name="provider_null"></a> [null](#provider\_null) | n/a |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [helm_release.argocd](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [null_resource.extra_manifests](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| chart\_version | version of charts | `string` | `"2.7.4"` | no |
-| ingress\_annotations | annotations to pass to the ingress | `map` | `{}` | no |
-| ingress\_host | The ingress host | `any` | `null` | no |
-| ingress\_tls\_secret | The TLS secret name for argocd ingress | `string` | `"argocd-server-tls"` | no |
-| module\_depends\_on | resources that the module depends on, aks, namespace creation etc | `any` | `null` | no |
-| namespace | The namespace to deploy argocd into | `string` | `"argocd"` | no |
-| repositories | A list of repository defintions | `list(map(string))` | `[]` | no |
-| server\_extra\_args | Extra arguments passed to argoCD server | `list` | `[]` | no |
-| server\_insecure | Whether to run the argocd-server with --insecure flag. Useful when disabling argocd-server tls default protocols to provide your certificates | `bool` | `false` | no |
+| <a name="input_chart_version"></a> [chart\_version](#input\_chart\_version) | version of charts | `any` | `null` | no |
+| <a name="input_config"></a> [config](#input\_config) | Additional config to be added to the Argocd configmap | `map` | `{}` | no |
+| <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Image tag to install | `string` | `null` | no |
+| <a name="input_ingress_annotations"></a> [ingress\_annotations](#input\_ingress\_annotations) | annotations to pass to the ingress | `map` | `{}` | no |
+| <a name="input_ingress_host"></a> [ingress\_host](#input\_ingress\_host) | The ingress host | `any` | `null` | no |
+| <a name="input_ingress_tls_secret"></a> [ingress\_tls\_secret](#input\_ingress\_tls\_secret) | The TLS secret name for argocd ingress | `string` | `"argocd-tls"` | no |
+| <a name="input_manifests"></a> [manifests](#input\_manifests) | Path/URL to manifests to be applied after argocd is deployed | `list(string)` | `null` | no |
+| <a name="input_namespace"></a> [namespace](#input\_namespace) | The namespace to deploy argocd into | `string` | `"argocd"` | no |
+| <a name="input_rbac_config"></a> [rbac\_config](#input\_rbac\_config) | Additional rbac config to be added to the Argocd rbac configmap | `map` | `{}` | no |
+| <a name="input_repositories"></a> [repositories](#input\_repositories) | A list of repository defintions | `list(map(string))` | `[]` | no |
+| <a name="input_server_extra_args"></a> [server\_extra\_args](#input\_server\_extra\_args) | Extra arguments passed to argoCD server | `list` | `[]` | no |
+| <a name="input_server_insecure"></a> [server\_insecure](#input\_server\_insecure) | Whether to run the argocd-server with --insecure flag. Useful when disabling argocd-server tls default protocols to provide your certificates | `bool` | `false` | no |
+| <a name="input_values"></a> [values](#input\_values) | Extra Values to pass to the Argocd Helm Deployment | `map` | `{}` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| namespace | the kubernetes namespace of the release |
-| release\_name | the name of the release |
-| server\_url | The server URL of argocd created by ingress |
+| <a name="output_namespace"></a> [namespace](#output\_namespace) | the kubernetes namespace of the release |
+| <a name="output_release_name"></a> [release\_name](#output\_release\_name) | the name of the release |
+| <a name="output_server_url"></a> [server\_url](#output\_server\_url) | The server URL of argocd created by ingress |
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

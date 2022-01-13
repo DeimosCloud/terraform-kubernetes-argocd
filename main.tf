@@ -8,6 +8,7 @@ terraform {
 }
 
 locals {
+  extra_manifests = join(" ", var.manifests)
 
   secret_name = "argocd-repository-credentials"
 
@@ -68,13 +69,18 @@ locals {
   ]
 
   # If no_auth_config has been specified, set all configs as null
-  # https://github.com/argoproj/argo-helm/blob/master/charts/argo-cd/values.yaml
-  values = {
+  values = merge({
+    global = {
+      image = {
+        tag = var.image_tag
+      }
+    }
     server = {
-      config = {
+      config = merge({
         # Configmaps require strings, yamlencode the map
         repositories = yamlencode(local.clean_repositories)
-      }
+      }, var.config)
+      rbacConfig = var.rbac_config
       # Run insecure mode if specified, to prevent argocd from using it's own certificate
       extraArgs = var.server_insecure ? ["--insecure"] : null
       # Ingress Values
@@ -92,7 +98,7 @@ locals {
     configs = {
       repositoryCredentials = local.secrets
     }
-  }
+  })
 }
 
 # ArgoCD Charts
@@ -103,7 +109,25 @@ resource "helm_release" "argocd" {
   version          = var.chart_version
   namespace        = var.namespace
   create_namespace = true
+  # force_update = true
+  # dependency_update = true
 
-  values     = [yamlencode(local.values)]
-  depends_on = [var.module_depends_on]
+  values = [yamlencode(local.values)]
+}
+
+resource "null_resource" "extra_manifests" {
+  triggers = {
+    extra_manifests = local.extra_manifests
+  }
+
+  provisioner "local-exec" {
+    command = "kubectl apply -f '${self.triggers.extra_manifests}'"
+    when    = create
+  }
+  provisioner "local-exec" {
+    command = "kubectl delete -f '${self.triggers.extra_manifests}'"
+    when    = destroy
+  }
+
+  depends_on = [helm_release.argocd]
 }
