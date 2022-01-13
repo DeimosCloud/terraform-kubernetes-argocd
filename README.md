@@ -35,11 +35,14 @@ locals {
 module "argocd" {
   source              = "https://gitlab.com/deimosdev/tooling/terraform-modules/terraform-kubernetes-argocd"
   ingress_host        = "argocd.example.com"
+  ingress_annotations = local.argocd_ingress_annotations
   repositories        = local.argocd_repositories
+  # Argocd Config
   config = {
     "accounts.image-updater" = "apiKey"
   }
 
+  # Argocd RBAC Config
   rbac_config = {
     "policy.default" = "role:readonly"
     "policy.csv"     = <<POLICY
@@ -48,7 +51,6 @@ module "argocd" {
   g, image-updater, role:image-updater
 POLICY
   }
-  ingress_annotations = local.argocd_ingress_annotations
 
   module_depends_on = [module.gke]
 }
