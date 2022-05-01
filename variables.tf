@@ -6,12 +6,12 @@ variable "namespace" {
 variable "repositories" {
   description = "A list of repository defintions"
   default     = []
-  type        = list(map(string))
+  type        = list(string)
 }
 
 variable "chart_version" {
   description = "version of charts"
-  default     = null
+  default     = ">=2.3.3"
 }
 
 variable "server_extra_args" {
@@ -39,10 +39,16 @@ variable "ingress_annotations" {
   default     = {}
 }
 
+# variable "manifests" {
+#   description = "Path/URL to manifests to be applied after argocd is deployed"
+#   default     = []
+#   type        = list(string)
+# }
+
 variable "manifests" {
-  description = "Path/URL to manifests to be applied after argocd is deployed"
-  default     = []
-  type        = list(string)
+  description = "Path/URL to directory that contains manifest files to be applied after argocd is deployed"
+  default     = ""
+  type        = string
 }
 
 variable "image_tag" {

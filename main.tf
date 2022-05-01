@@ -1,14 +1,16 @@
 terraform {
-  required_version = ">= 0.12"
+  required_version = ">= 0.13"
 
   required_providers {
     helm       = ">=1.2.3"
-    kubernetes = ">=1.11.3"
+    kubernetes = ">=2.10.0"
+    google     = ">=4.19.0"
+    kubectl    = ">= 1.14.0"
   }
 }
 
 locals {
-  extra_manifests = join(" ", var.manifests)
+  # extra_manifests = join(" ", var.manifests)
 
   secret_name = "argocd-repository-credentials"
 
@@ -22,9 +24,9 @@ locals {
   secret_values = [
     for repo in var.repositories :
     [
-      lookup(repo, "username", lookup(repo, "access_token", null) != null ? "argocd" : null),
-      lookup(repo, "password", lookup(repo, "access_token", null)),
-      lookup(repo, "password", lookup(repo, "ssh_key", null))
+      lookup({ repo : repo }, "username", lookup({ repo : repo }, "access_token", null) != null ? "argocd" : null),
+      lookup({ repo : repo }, "password", lookup({ repo : repo }, "access_token", null)),
+      lookup({ repo : repo }, "password", lookup({ repo : repo }, "ssh_key", null))
     ]
   ]
 
@@ -44,17 +46,17 @@ locals {
   # }
   all_repositories = [
     for i, repo in var.repositories : {
-      type = lookup(repo, "type", null)
-      url  = repo.url
-      usernameSecret = lookup(repo, "username", lookup(repo, "access_token", null) != null ? "argocd" : null) == null ? null : {
+      type = lookup({ repo : repo }, "type", null)
+      url  = repo
+      usernameSecret = lookup({ repo : repo }, "username", lookup({ repo : repo }, "access_token", null) != null ? "argocd" : null) == null ? null : {
         key  = "username-${i}"
         name = local.secret_name
       }
-      passwordSecret = lookup(repo, "password", lookup(repo, "access_token", null)) == null ? null : {
+      passwordSecret = lookup({ repo : repo }, "password", lookup({ repo : repo }, "access_token", null)) == null ? null : {
         key  = "password-${i}"
         name = local.secret_name
       }
-      sshSecret = lookup(repo, "password", lookup(repo, "ssh_key", null)) == null ? null : {
+      sshSecret = lookup({ repo : repo }, "password", lookup({ repo : repo }, "ssh_key", null)) == null ? null : {
         key  = "sshkey-${i}"
         name = local.secret_name
       }
@@ -75,8 +77,9 @@ locals {
         tag = var.image_tag
       }
     }
+
     server = {
-      config = merge({
+      configs = merge({
         # Configmaps require strings, yamlencode the map
         repositories = yamlencode(local.clean_repositories)
       }, var.config)
@@ -112,23 +115,17 @@ resource "helm_release" "argocd" {
   # force_update = true
   # dependency_update = true
 
-  values = [yamlencode(local.values)]
+  values = [yamlencode(local.values), yamlencode(var.values)]
 }
 
-resource "null_resource" "extra_manifests" {
-  count = length(local.extra_manifests) > 0 ? 1 : 0
-  triggers = {
-    extra_manifests = local.extra_manifests
-  }
+data "kubectl_path_documents" "docs" {
+  pattern = "${var.manifests}/*.yaml"
+}
 
-  provisioner "local-exec" {
-    command = "kubectl apply -f '${self.triggers.extra_manifests}'"
-    when    = create
-  }
-  provisioner "local-exec" {
-    command = "kubectl delete -f '${self.triggers.extra_manifests}'"
-    when    = destroy
-  }
+resource "kubectl_manifest" "extra_manifests" {
+  for_each  = toset(data.kubectl_path_documents.docs.documents)
+  yaml_body = each.value
 
   depends_on = [helm_release.argocd]
 }
+
