@@ -5,7 +5,11 @@ terraform {
     helm       = ">=1.2.3"
     kubernetes = ">=2.10.0"
     google     = ">=4.19.0"
-    kubectl    = ">= 1.14.0"
+
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = ">= 1.14.0"
+    }
   }
 }
 
@@ -24,9 +28,9 @@ locals {
   secret_values = [
     for repo in var.repositories :
     [
-      lookup({ repo : repo }, "username", lookup({ repo : repo }, "access_token", null) != null ? "argocd" : null),
-      lookup({ repo : repo }, "password", lookup({ repo : repo }, "access_token", null)),
-      lookup({ repo : repo }, "password", lookup({ repo : repo }, "ssh_key", null))
+      lookup(repo, "username", lookup(repo, "access_token", null) != null ? "argocd" : null),
+      lookup(repo, "password", lookup(repo, "access_token", null)),
+      lookup(repo, "password", lookup(repo, "ssh_key", null))
     ]
   ]
 
@@ -44,19 +48,20 @@ locals {
   # passwordSecret = passwordSecret
   # sshSecret      = sshSecret
   # }
+
   all_repositories = [
     for i, repo in var.repositories : {
-      type = lookup({ repo : repo }, "type", null)
-      url  = repo
-      usernameSecret = lookup({ repo : repo }, "username", lookup({ repo : repo }, "access_token", null) != null ? "argocd" : null) == null ? null : {
+      type = lookup(repo, "type", null)
+      url  = repo.url
+      usernameSecret = lookup(repo, "username", lookup(repo, "access_token", null) != null ? "argocd" : null) == null ? null : {
         key  = "username-${i}"
         name = local.secret_name
       }
-      passwordSecret = lookup({ repo : repo }, "password", lookup({ repo : repo }, "access_token", null)) == null ? null : {
+      passwordSecret = lookup(repo, "password", lookup(repo, "access_token", null)) == null ? null : {
         key  = "password-${i}"
         name = local.secret_name
       }
-      sshSecret = lookup({ repo : repo }, "password", lookup({ repo : repo }, "ssh_key", null)) == null ? null : {
+      sshSecret = lookup(repo, "password", lookup(repo, "ssh_key", null)) == null ? null : {
         key  = "sshkey-${i}"
         name = local.secret_name
       }
@@ -79,7 +84,7 @@ locals {
     }
 
     server = {
-      configs = merge({
+      config = merge({
         # Configmaps require strings, yamlencode the map
         repositories = yamlencode(local.clean_repositories)
       }, var.config)
