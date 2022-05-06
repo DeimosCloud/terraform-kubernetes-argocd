@@ -6,12 +6,12 @@ variable "namespace" {
 variable "repositories" {
   description = "A list of repository defintions"
   default     = []
-  type        = list(string)
+  type        = list(map(string))
 }
 
 variable "chart_version" {
   description = "version of charts"
-  default     = ">=2.3.3"
+  default     = ">=4.5.10"
 }
 
 variable "server_extra_args" {
