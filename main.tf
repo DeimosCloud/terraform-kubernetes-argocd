@@ -124,7 +124,7 @@ resource "helm_release" "argocd" {
 }
 
 data "kubectl_path_documents" "docs" {
-  pattern = "${var.manifests}/*.yaml"
+  pattern = "${var.manifests_directory}/*.yaml"
 }
 
 resource "kubectl_manifest" "extra_manifests" {
