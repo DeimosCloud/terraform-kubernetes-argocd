@@ -45,7 +45,7 @@ variable "ingress_annotations" {
 #   type        = list(string)
 # }
 
-variable "manifests" {
+variable "manifests_directory" {
   description = "Path/URL to directory that contains manifest files to be applied after argocd is deployed"
   default     = ""
   type        = string

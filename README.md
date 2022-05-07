@@ -126,7 +126,7 @@ No modules.
 | <a name="input_ingress_annotations"></a> [ingress\_annotations](#input\_ingress\_annotations) | annotations to pass to the ingress | `map` | `{}` | no |
 | <a name="input_ingress_host"></a> [ingress\_host](#input\_ingress\_host) | The ingress host | `any` | `null` | no |
 | <a name="input_ingress_tls_secret"></a> [ingress\_tls\_secret](#input\_ingress\_tls\_secret) | The TLS secret name for argocd ingress | `string` | `"argocd-tls"` | no |
-| <a name="input_manifests"></a> [manifests](#input\_manifests) | Path/URL to directory that contains manifest files to be applied after argocd is deployed | `string` | `""` | no |
+| <a name="input_manifests_directory"></a> [manifests\_directory](#input\_manifests\_directory) | Path/URL to directory that contains manifest files to be applied after argocd is deployed | `string` | `""` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | The namespace to deploy argocd into | `string` | `"argocd"` | no |
 | <a name="input_rbac_config"></a> [rbac\_config](#input\_rbac\_config) | Additional rbac config to be added to the Argocd rbac configmap | `map` | `{}` | no |
 | <a name="input_repositories"></a> [repositories](#input\_repositories) | A list of repository defintions | `list(map(string))` | `[]` | no |
