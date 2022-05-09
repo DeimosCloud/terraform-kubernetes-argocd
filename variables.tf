@@ -11,7 +11,7 @@ variable "repositories" {
 
 variable "chart_version" {
   description = "version of charts"
-  default     = null
+  default     = "4.5.10"
 }
 
 variable "server_extra_args" {
@@ -39,10 +39,16 @@ variable "ingress_annotations" {
   default     = {}
 }
 
-variable "manifests" {
-  description = "Path/URL to manifests to be applied after argocd is deployed"
-  default     = []
-  type        = list(string)
+# variable "manifests" {
+#   description = "Path/URL to manifests to be applied after argocd is deployed"
+#   default     = []
+#   type        = list(string)
+# }
+
+variable "manifests_directory" {
+  description = "Path/URL to directory that contains manifest files to be applied after argocd is deployed"
+  default     = ""
+  type        = string
 }
 
 variable "image_tag" {
