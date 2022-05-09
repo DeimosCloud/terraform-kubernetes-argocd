@@ -120,7 +120,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_chart_version"></a> [chart\_version](#input\_chart\_version) | version of charts | `string` | `">=4.5.10"` | no |
+| <a name="input_chart_version"></a> [chart\_version](#input\_chart\_version) | version of charts | `string` | `"4.5.10"` | no |
 | <a name="input_config"></a> [config](#input\_config) | Additional config to be added to the Argocd configmap | `map` | `{}` | no |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Image tag to install | `string` | `null` | no |
 | <a name="input_ingress_annotations"></a> [ingress\_annotations](#input\_ingress\_annotations) | annotations to pass to the ingress | `map` | `{}` | no |

@@ -11,7 +11,7 @@ variable "repositories" {
 
 variable "chart_version" {
   description = "version of charts"
-  default     = ">=4.5.10"
+  default     = "4.5.10"
 }
 
 variable "server_extra_args" {
