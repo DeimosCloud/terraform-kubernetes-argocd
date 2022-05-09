@@ -104,7 +104,7 @@ locals {
       }
     }
     configs = {
-      repositoryCredentials = local.secrets
+      repositories = local.secrets
     }
   })
 }
