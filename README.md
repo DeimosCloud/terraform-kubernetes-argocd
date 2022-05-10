@@ -6,7 +6,6 @@ Setup ArgoCD on cluster using terraform. Ensure the `kubernetes` provider config
 
 ### Argocd with Nginx Ingress Controller
 ```hcl
-
 locals {
   # Example annotations when using Nginx ingress controller as shown here https://argoproj.github.io/argo-cd/operator-manual/ingress/#option-1-ssl-passthrough
   argocd_ingress_annotations = {
@@ -16,7 +15,7 @@ locals {
   }
   argocd_repositories = [
     {
-      url          = "https://repo.git"
+      url      = "https://repo.git"
       username = "hello"
       password = "bar"
     },
@@ -33,7 +32,8 @@ locals {
 }
 
 module "argocd" {
-  source              = "https://gitlab.com/deimosdev/tooling/terraform-modules/terraform-kubernetes-argocd"
+  source  = "DeimosCloud/argocd/kubernetes"  
+  
   ingress_host        = "argocd.example.com"
   ingress_annotations = local.argocd_ingress_annotations
   repositories        = local.argocd_repositories
@@ -68,9 +68,10 @@ locals {
 }
 
 module "argocd" {
-  source              = "https://gitlab.com/deimosdev/tooling/terraform-modules/terraform-kubernetes-argocd"
+  source  = "DeimosCloud/argocd/kubernetes"  
+  
   repositories        = local.argocd_repositories
-  ingress_host        = "argocd.${var.dns_zone_name}"
+  ingress_host        = "argocd.example.com"
   ingress_annotations = local.argocd_ingress_annotations
   server_insecure     = true # Run argocd-server in secure mode to prevent SSL conflicts with application/gateway and cert-manager
 
