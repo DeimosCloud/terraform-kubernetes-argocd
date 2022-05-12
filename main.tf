@@ -3,9 +3,7 @@ terraform {
 
   required_providers {
     helm       = ">=1.2.3"
-    kubernetes = ">=2.10.0"
-    google     = ">=4.19.0"
-
+    kubernetes = ">=1.13.0"
     kubectl = {
       source  = "gavinbunney/kubectl"
       version = ">= 1.14.0"
