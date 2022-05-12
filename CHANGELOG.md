@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [1.1.1](https://github.com/DeimosCloud/terraform-kubernetes-argocd/compare/v1.1.0...v1.1.1) (2022-05-12)
+
+
+### Bug Fixes
+
+* remove google provider and update kubernetes version ([bdab03b](https://github.com/DeimosCloud/terraform-kubernetes-argocd/commit/bdab03bf6ad6b08b1a58ba19d403729716b9a81a))
+
 ## [1.1.0](https://github.com/DeimosCloud/terraform-kubernetes-argocd/compare/v1.0.5...v1.1.0) (2022-05-09)
 
 
