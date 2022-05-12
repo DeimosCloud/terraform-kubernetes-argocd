@@ -1,16 +1,3 @@
-terraform {
-  required_version = ">= 0.13"
-
-  required_providers {
-    helm       = ">=1.2.3"
-    kubernetes = ">=1.13.0"
-    kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = ">= 1.14.0"
-    }
-  }
-}
-
 locals {
   # extra_manifests = join(" ", var.manifests)
 

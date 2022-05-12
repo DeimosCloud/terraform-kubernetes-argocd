@@ -1,11 +1,28 @@
 # Terraform-argocd
-Setup ArgoCD on cluster using terraform. Ensure the `kubernetes` provider configuration and `helm` provider configuration works fine
+Setup ArgoCD on cluster using terraform.  This uses the Argocd helm chart to deploy argocd into the cluster. You can pass extra params via `var.values` to customize your deployments
 
 ## Usage
 
+> NOTE: Ensure [Helm Provider](https://registry.terraform.io/providers/hashicorp/helm/latest/docs) and [kubectl provider](https://registry.terraform.io/providers/gavinbunney/kubectl) is configureed are correct 
 
 ### Argocd with Nginx Ingress Controller
 ```hcl
+# providers.tf
+...
+provider "helm" {
+  kubernetes {
+    config_path = "~/.kube/config"
+  }
+}
+
+provider "kubectl" {
+  load_config_file       = true
+  config_path = "~/.kube/config"
+}
+...
+
+# main.tf
+...
 locals {
   # Example annotations when using Nginx ingress controller as shown here https://argoproj.github.io/argo-cd/operator-manual/ingress/#option-1-ssl-passthrough
   argocd_ingress_annotations = {
@@ -31,6 +48,7 @@ locals {
 
 }
 
+...
 module "argocd" {
   source  = "DeimosCloud/argocd/kubernetes"  
   
@@ -54,6 +72,7 @@ POLICY
 
   module_depends_on = [module.gke]
 }
+...
 ```
 
 ### Argocd with Azure Application Gateway Ingress Controller
@@ -79,7 +98,6 @@ module "argocd" {
 }
 ```
 
-Ensure Kubernetes Provider and Helm Provider settings are correct https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/guides/getting-started#provider-setup
 
 ## Contributing
 
@@ -93,10 +111,8 @@ Full contributing guidelines are covered [here](CONTRIBUTING.md).
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
-| <a name="requirement_google"></a> [google](#requirement\_google) | >=4.19.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >=1.2.3 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 1.14.0 |
-| <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >=2.10.0 |
 
 ## Providers
 
