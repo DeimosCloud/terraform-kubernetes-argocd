@@ -5,8 +5,14 @@ variable "namespace" {
 
 variable "repositories" {
   description = "A list of repository defintions"
-  default     = []
-  type        = list(map(string))
+  default     = {}
+  type = map(object({
+    url           = string
+    type          = optional(string)
+    username      = optional(string)
+    password      = optional(string)
+    sshPrivateKey = optional(string)
+  }))
 }
 
 variable "chart_version" {
@@ -39,11 +45,11 @@ variable "ingress_annotations" {
   default     = {}
 }
 
-# variable "manifests" {
-#   description = "Path/URL to manifests to be applied after argocd is deployed"
-#   default     = []
-#   type        = list(string)
-# }
+variable "manifests" {
+  description = "Raw manifests to be applied after argocd is deployed"
+  default     = []
+  type        = list(string)
+}
 
 variable "manifests_directory" {
   description = "Path/URL to directory that contains manifest files to be applied after argocd is deployed"
@@ -69,5 +75,11 @@ variable "rbac_config" {
 
 variable "values" {
   default     = {}
-  description = "Extra Values to pass to the Argocd Helm Deployment"
+  description = "A terraform map of extra values to pass to the Argocd Helm"
+}
+
+variable "values_files" {
+  type        = list(string)
+  default     = []
+  description = "Path to values files be passed to the Argocd Helm Deployment"
 }

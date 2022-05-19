@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 0.13"
+  required_version = ">= 0.15"
 
   required_providers {
     helm = {
@@ -11,4 +11,6 @@ terraform {
       version = ">= 1.14.0"
     }
   }
+  experiments = [module_variable_optional_attrs]
+
 }

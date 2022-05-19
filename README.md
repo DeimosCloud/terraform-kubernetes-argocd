@@ -30,19 +30,22 @@ locals {
     "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     "nginx.ingress.kubernetes.io/ssl-passthrough" = "true"
   }
-  argocd_repositories = [
-    {
+  argocd_repositories = {
+    "private-repo" = {
       url      = "https://repo.git"
-      username = "hello"
-      password = "bar"
+      username = "argocd"
+      password = "access_token"
     },
-    {
-      url          = "https://repo.git"
-      access_token = var.argocd_access_token
+    "git-repo" = {
+      url      = "https://repo.git"
+      password = var.argocd_access_token # when using access token, you pass a random username
+      username = "admin"
     },
-    {
+    "private-helm-chart" = {
       url  = "https://charts.jetstack.io"
       type = "helm"
+      username = "foo"
+      password = "bar"
     },
   ]
 
@@ -110,7 +113,7 @@ Full contributing guidelines are covered [here](CONTRIBUTING.md).
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.15 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >=1.2.3 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 1.14.0 |
 
@@ -143,13 +146,15 @@ No modules.
 | <a name="input_ingress_annotations"></a> [ingress\_annotations](#input\_ingress\_annotations) | annotations to pass to the ingress | `map` | `{}` | no |
 | <a name="input_ingress_host"></a> [ingress\_host](#input\_ingress\_host) | The ingress host | `any` | `null` | no |
 | <a name="input_ingress_tls_secret"></a> [ingress\_tls\_secret](#input\_ingress\_tls\_secret) | The TLS secret name for argocd ingress | `string` | `"argocd-tls"` | no |
+| <a name="input_manifests"></a> [manifests](#input\_manifests) | Raw manifests to be applied after argocd is deployed | `list(string)` | `[]` | no |
 | <a name="input_manifests_directory"></a> [manifests\_directory](#input\_manifests\_directory) | Path/URL to directory that contains manifest files to be applied after argocd is deployed | `string` | `""` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | The namespace to deploy argocd into | `string` | `"argocd"` | no |
 | <a name="input_rbac_config"></a> [rbac\_config](#input\_rbac\_config) | Additional rbac config to be added to the Argocd rbac configmap | `map` | `{}` | no |
-| <a name="input_repositories"></a> [repositories](#input\_repositories) | A list of repository defintions | `list(map(string))` | `[]` | no |
+| <a name="input_repositories"></a> [repositories](#input\_repositories) | A list of repository defintions | <pre>map(object({<br>    url           = string<br>    type          = optional(string)<br>    username      = optional(string)<br>    password      = optional(string)<br>    sshPrivateKey = optional(string)<br>  }))</pre> | `{}` | no |
 | <a name="input_server_extra_args"></a> [server\_extra\_args](#input\_server\_extra\_args) | Extra arguments passed to argoCD server | `list` | `[]` | no |
 | <a name="input_server_insecure"></a> [server\_insecure](#input\_server\_insecure) | Whether to run the argocd-server with --insecure flag. Useful when disabling argocd-server tls default protocols to provide your certificates | `bool` | `false` | no |
-| <a name="input_values"></a> [values](#input\_values) | Extra Values to pass to the Argocd Helm Deployment | `map` | `{}` | no |
+| <a name="input_values"></a> [values](#input\_values) | A terraform map of extra values to pass to the Argocd Helm | `map` | `{}` | no |
+| <a name="input_values_files"></a> [values\_files](#input\_values\_files) | Path to values files be passed to the Argocd Helm Deployment | `list(string)` | `[]` | no |
 
 ## Outputs
 
