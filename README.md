@@ -113,7 +113,7 @@ Full contributing guidelines are covered [here](CONTRIBUTING.md).
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.15 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.14 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >=1.2.3 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 1.14.0 |
 
